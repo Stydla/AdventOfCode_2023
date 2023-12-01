@@ -142,7 +142,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AdventOfCode\Interfaces\Interfaces.csproj">
+    <ProjectReference Include="..\..\AdventOfCode\Interfaces\Interfaces.csproj">
       <Project>{8E871211-7987-4960-81C6-25538DFDCA91}</Project>
       <Name>Interfaces</Name>
     </ProjectReference>
