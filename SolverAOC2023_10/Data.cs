@@ -249,7 +249,7 @@ namespace SolverAOC2023_10
 
       RecAssing();
 
-      Debug.WriteLine(PrintByType());
+      //Debug.WriteLine(PrintByType());
 
       return AllFields.Values.Count(x=>x.FieldType == EFieldType.Inside);
     }
