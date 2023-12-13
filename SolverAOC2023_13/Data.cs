@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AoCLib;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,23 +9,58 @@ using System.Threading.Tasks;
 
 namespace SolverAOC2023_13
 {
-    internal class Data : DataBase
+  internal class Data : DataBase
+  {
+
+
+    public List<Map> Maps { get; set; } = new List<Map>();
+
+    public Data(string input) : base(input)
     {
-        public Data(string input) : base(input)
+      // optionaly parse data
+      List<string> mapLines = new List<string>();
+      for(int i = 0; i < Lines.Count; i++)
+      {
+        string line = Lines[i];
+        if(string.IsNullOrEmpty(line))
         {
-            // optionaly parse data
+          Map mapTmp = new Map(mapLines);
+          Maps.Add(mapTmp);
+          mapLines.Clear();
         }
-
-        public object Solve1()
+        else
         {
-            throw new NotImplementedException();
+          mapLines.Add(line);
         }
-
-        public object Solve2()
-        {
-            throw new NotImplementedException();
-        }
-
-
+      }
+      Map m = new Map(mapLines);
+      Maps.Add(m);
     }
+
+    public object Solve1()
+    {
+      long result = 0;
+      foreach(Map map in Maps)
+      {
+        long tmpRes = map.Solve();
+        result += tmpRes;
+      }
+      //12864
+      return result;
+    }
+
+    public object Solve2()
+    {
+      long result = 0;
+      foreach (Map map in Maps)
+      {
+        long tmpRes = map.Solve2();
+        result += tmpRes;
+      }
+      //12864
+      return result;
+    }
+
+
+  }
 }
