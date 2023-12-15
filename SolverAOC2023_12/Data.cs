@@ -63,7 +63,6 @@ namespace SolverAOC2023_12
       {
         i.Solve(new HashSet<Item>());
         long tmp = i.Count;
-        Debug.WriteLine(tmp);
         total += tmp;
       }
       return total;
