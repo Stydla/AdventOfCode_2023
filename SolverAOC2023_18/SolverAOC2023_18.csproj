@@ -79,10 +79,15 @@
   <ItemGroup>
     <Compile Include="Data.cs" />
     <Compile Include="DataBase.cs" />
+    <Compile Include="DirectionItem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\AdventOfCode\AoCLib\AoCLib.csproj">
+      <Project>{046980B3-035B-4F81-9787-F92BCE9FC221}</Project>
+      <Name>AoCLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\AdventOfCode\Interfaces\Interfaces.csproj">
       <Project>{8e871211-7987-4960-81c6-25538dfdca91}</Project>
       <Name>Interfaces</Name>
