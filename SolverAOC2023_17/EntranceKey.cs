@@ -27,7 +27,15 @@ namespace SolverAOC2023_17
       int cnt = directions.Count;
       for(int i = 0; i < cnt; i++)
       {
-        char c = directions[cnt - i - 1].ToString()[0];
+        char c = '\0';
+        switch(directions[cnt - i - 1])
+        {
+          case EDirection4.RIGHT: c = 'R'; break;
+          case EDirection4.DOWN: c = 'D'; break;
+          case EDirection4.LEFT: c = 'L'; break;
+          case EDirection4.UP: c = 'U'; break;
+        }
+
         if (i > 0)
         {
           if (dirs[0] != c) break;
