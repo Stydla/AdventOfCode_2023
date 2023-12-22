@@ -148,7 +148,7 @@ namespace SolverAOC2023_20
       LinkedList<PulseMessage> currentMessages = new LinkedList<PulseMessage>();
       currentMessages.AddLast(new PulseMessage(EPulse.Low, ButtonModule, BroadcastModule));
 
-      Debug.WriteLine($"{GetCustomHash()} | {GetCustomHash().Count(x=>x== 'I')} {index++}");
+      //Debug.WriteLine($"{GetCustomHash()} | {GetCustomHash().Count(x=>x== 'I')} {index++}");
       while (currentMessages.Count > 0)
       {
       

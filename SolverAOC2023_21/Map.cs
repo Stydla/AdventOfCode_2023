@@ -257,7 +257,7 @@ namespace SolverAOC2023_21
         long tmp = (xCnt+1) * (yCnt)/2;
         res += tmp;
       }
-      Debug.WriteLine(Print());
+      //Debug.WriteLine(Print());
       return res;
     }
   }
