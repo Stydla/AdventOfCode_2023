@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,9 @@ namespace SolverAOC2023_19
     public Dictionary<string, Workflow> AllWorkflows { get; } = new Dictionary<string, Workflow>();
 
     public List<Rating> Ratings { get; } = new List<Rating>();
+
+    public static int PathCount = 0;
+
 
     public Data(string input) : base(input)
     {
@@ -83,6 +87,7 @@ namespace SolverAOC2023_19
       Workflow current = AllWorkflows["in"];
 
       long res = current.GetAllPossibilities(new List<Rule>(), new List<Rule>());
+      Debug.WriteLine(PathCount);
       return res;
     
     }

@@ -66,6 +66,7 @@ namespace SolverAOC2023_19
     {
       if(IsAccepted())
       {
+        
         RatingRange rr = new RatingRange();
         foreach(Rule rule in ruleListPassed) 
         {
@@ -76,6 +77,7 @@ namespace SolverAOC2023_19
           rr.ApplyRuleFailed(rule);
         }
         long val = rr.GetValue();
+        if(val > 0) Data.PathCount++;
         return val;
       }
 

@@ -7,23 +7,32 @@ using System.Threading.Tasks;
 
 namespace SolverAOC2023_22
 {
-    internal class Data : DataBase
+  internal class Data : DataBase
+  {
+
+    public Space Space { get; set; }
+
+    public Data(string input) : base(input)
     {
-        public Data(string input) : base(input)
-        {
-            // optionaly parse data
-        }
-
-        public object Solve1()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object Solve2()
-        {
-            throw new NotImplementedException();
-        }
-
+      // optionaly parse data
+      Space = new Space(Lines);
 
     }
+
+    public object Solve1()
+    {
+      Space.Settle();
+      int count = Space.GetDesitegrableBricksCount();
+      return count;
+    }
+
+    public object Solve2()
+    {
+      Space.Settle();
+      int count = Space.GetFallCount();
+      return count;
+    }
+
+
+  }
 }

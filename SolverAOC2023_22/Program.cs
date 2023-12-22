@@ -10,7 +10,7 @@ namespace SolverAOC2023_22
     public class Program : BaseAdventSolver, IAdventSolver
     {
 
-        public override string SolverName => "SolverAOC2023_22"/*TODO: Task Name*/;
+        public override string SolverName => "Day 22: Sand Slabs"/*TODO: Task Name*/;
 
         public override string InputsFolderName => "SolverAOC2023_22";
 
