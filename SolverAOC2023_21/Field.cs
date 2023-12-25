@@ -64,19 +64,12 @@ namespace SolverAOC2023_21
     public bool IsOpen(BFSFieldContext context)
     {
       return true;
-      //if(context.VisitedFields.Contains(this))
-      //{
-      //  return false;
-      //}
-      //context.VisitedFields.Add(this);
-      //return true;
     }
 
     public override string ToString()
     {
       return $"{Location}";
       
-
     }
   }
 

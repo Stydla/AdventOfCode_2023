@@ -31,27 +31,32 @@ namespace SolverAOC2023_21
     public object Solve1()
     {
       Map current = Map;
-      current.AddForSolve(current.StartField);
+      current.ForSolve.Add(current.StartField.Location, current.StartField);
 
-      for(int i = 0; i < Steps1; i++)
-      {
-        current = current.GetNextMap();
-      }
+      Map.GetDistances();
+
+      long res = Map.Solve(Steps1);
+      return res;
+
+      //Map current = Map;
+      //current.AddForSolve(current.StartField);
+
+      //for(int i = 0; i < Steps1; i++)
+      //{
+      //  current = current.GetNextMap();
+      //}
       
-      return current.GetRachableCount();
+      //return current.GetRachableCount();
     }
 
     public object Solve2()
     {
       Map current = Map;
       current.ForSolve.Add(current.StartField.Location, current.StartField);
-      for (int i = 0; i < Steps2; i++)
-      {
-        current = current.GetNextMap();
-      }
-      //Debug.WriteLine(current.Print());
 
-      long res = current.Solve2(Steps2);
+      Map.GetDistances();
+
+      long res = Map.Solve(Steps2);
       return res;
 
     }

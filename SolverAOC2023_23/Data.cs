@@ -7,23 +7,30 @@ using System.Threading.Tasks;
 
 namespace SolverAOC2023_23
 {
-    internal class Data : DataBase
+  internal class Data : DataBase
+  {
+
+    public Map Map { get; set; }
+
+    public Data(string input) : base(input)
     {
-        public Data(string input) : base(input)
-        {
-            // optionaly parse data
-        }
+      // optionaly parse data
 
-        public object Solve1()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object Solve2()
-        {
-            throw new NotImplementedException();
-        }
-
+      Map = new Map(Lines);
 
     }
+
+    public object Solve1()
+    {
+      int ret = Map.Solve();
+      return ret;
+    }
+
+    public object Solve2()
+    {
+      throw new NotImplementedException();
+    }
+
+
+  }
 }
