@@ -65,36 +65,80 @@ namespace SolverAOC2023_24
     public object Solve2()
     {
 
-      long S_lowerThen = long.MaxValue;
-      long V_greaterThen = long.MinValue;
+      long S_lowerThenX = long.MaxValue;
+      long V_greaterThenX = long.MinValue;
 
-      long S_greaterThen = long.MinValue;
-      long V_lowerThen = long.MinValue;
+      long S_greaterThenX = long.MinValue;
+      long V_lowerThenX = long.MinValue;
+      long S_greaterThenY = long.MinValue;
+      long V_lowerThenY = long.MinValue;
+      long S_greaterThenZ = long.MinValue;
+      long V_lowerThenZ = long.MinValue;
 
-      S_lowerThen = (long)Hailstones.Min(x=>x.Position.X);
-      V_greaterThen = (long)Hailstones.Max(x=>x.V_X);
+      S_lowerThenX = (long)Hailstones.Min(x=>x.Position.X);
+      V_greaterThenX = (long)Hailstones.Max(x=>x.V_X);
 
-      S_greaterThen = (long)Hailstones.Max(x => x.Position.X);
-      V_lowerThen = (long)Hailstones.Min(x => x.V_X);
+      S_greaterThenX = (long)Hailstones.Max(x => x.Position.X);
+      V_lowerThenX = (long)Hailstones.Min(x => x.V_X);
+      S_greaterThenY = (long)Hailstones.Max(x => x.Position.Y);
+      V_lowerThenY = (long)Hailstones.Min(x => x.V_Y);
+      S_greaterThenZ = (long)Hailstones.Max(x => x.Position.Z);
+      V_lowerThenZ = (long)Hailstones.Min(x => x.V_Z);
 
-      //for (int i = 19; i  <= 25; i++)
+
+      Coords coord = new Coords(S_greaterThenX, S_greaterThenY, S_greaterThenZ);
+      double V_X = V_lowerThenX - 1;
+      double V_Y = V_lowerThenY - 1;
+      double V_Z = V_lowerThenZ - 1;
+
+      bool change = true;
+      while(change) 
+      {
+        change = false;
+
+        Hailstone hs = new Hailstone(coord, V_X, V_Y, V_Z);
+        foreach (Hailstone hsTarget in Hailstones)
+        {
+          double collisionTimeX = hs.GetCollisionTimeX(hsTarget);
+          if (collisionTimeX < 0)
+          {
+            coord.X++;
+            change = true;
+          }
+          double collisionTimeY = hs.GetCollisionTimeY(hsTarget);
+          if (collisionTimeY < 0)
+          {
+            coord.Y++;
+            change = true;
+          }
+          double collisionTimeZ = hs.GetCollisionTimeZ(hsTarget);
+          if (collisionTimeZ < 0)
+          {
+            coord.Z++;
+            change = true;
+          }
+          Debug.WriteLine($"{hs} | {collisionTimeX} {collisionTimeY} {collisionTimeZ}");
+        }
+      }
+
+      //for (int i = 19; i <= 25; i++)
       //{
-      //  for(int j = -3; j > -20; j--) 
-      //  { 
-      //    Coords c = new Coords(i, 0, 0);
-      //    Hailstone hs = new Hailstone(c, j, 0, 0);
+      //  for (int j = -3; j > -20; j--)
+      //  {
+      //    Coords c = new Coords(i, 20, 20);
+      //    Hailstone hs = new Hailstone(c, j, 20,20);
 
-      //    foreach(Hailstone hsTarget in Hailstones)
+      //    foreach (Hailstone hsTarget in Hailstones)
       //    {
-      //      double collisionTime = hs.GetCollisionTimeX(hsTarget);
-      //      Debug.WriteLine($"S:{i}, V:{j}   | {collisionTime}");
+      //      double collisionTimeX = hs.GetCollisionTimeX(hsTarget);
+      //      double collisionTimeY = hs.GetCollisionTimeY(hsTarget);
+      //      double collisionTimeZ = hs.GetCollisionTimeZ(hsTarget);
+      //      Debug.WriteLine($"S:{i}, V:{j}   | {collisionTimeX} {collisionTimeY} {collisionTimeZ}");
       //    }
       //    Debug.WriteLine("");
       //  }
       //}
       return 0;
     }
-
-
   }
 }

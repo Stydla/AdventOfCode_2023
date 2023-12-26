@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,9 +17,7 @@ namespace SolverAOC2023_21
   {
 
     public Dictionary<Point2D, Field> BasePlots { get; } = new Dictionary<Point2D, Field>();
-    public Dictionary<Point2D, Field> ExtendedPlots { get; } = new Dictionary<Point2D, Field>();
     public Dictionary<Point2D, Field> Rocks { get; } = new Dictionary<Point2D, Field>();
-    public Dictionary<Point2D, Field> ExtendedRocks { get; } = new Dictionary<Point2D, Field>();
 
     public Dictionary<Point2D, Field> ForSolve { get; } = new Dictionary<Point2D, Field>();
     HashSet<Point2D> Visited { get; } = new HashSet<Point2D>();
@@ -26,8 +25,6 @@ namespace SolverAOC2023_21
     public Field StartField { get; }
 
     public Bounds2D BaseBounds { get; set; }
-    public Bounds2D ExtendedBounds { get; set; }
-
     public Map(List<string> input)
     {
       Dictionary<Point2D, Field> allFields  = new Dictionary<Point2D, Field>();
@@ -53,11 +50,8 @@ namespace SolverAOC2023_21
       StartField = BasePlots.Values.First(x => x.IsStart);
       BaseBounds = new Bounds2D(allFields.Values.Select(x=>x.Location).ToList());
 
-      Extend(allFields, ExtendCount);
-
     }
 
-    private int ExtendCount = 5;
 
     public Map(Map source)
     {
@@ -70,38 +64,7 @@ namespace SolverAOC2023_21
       StartField = source.StartField;
     }
 
-    public void Extend(Dictionary<Point2D, Field> allFields, int count)
-    {
-      int blockLengthX = BaseBounds.X.Max + 1;
-      int blockLengthY = BaseBounds.Y.Max + 1;
 
-      int minX = BaseBounds.X.Min - count * blockLengthX;
-      int maxX = BaseBounds.X.Max + count * blockLengthX;
-      int minY = BaseBounds.Y.Min - count * blockLengthY;
-      int maxY = BaseBounds.Y.Max + count * blockLengthY;
-
-      for (int i = minX; i <= maxX ; i++)
-      {
-        for(int j = minY; j <= maxY ; j++)
-        {
-          int x = Mod(j, blockLengthX);
-          int y = Mod(i, blockLengthY);
-          Point2D baseLocation = new Point2D(x, y);
-          char type = allFields[baseLocation].Type;
-
-          Point2D location = new Point2D(j, i);
-          Field field = new Field(type, location);
-          if (field.Type == '.')
-          {
-            ExtendedPlots.Add(location, field);
-          }
-          if (field.Type == '#')
-          {
-            ExtendedRocks.Add(location, field);
-          }
-        }
-      }
-    }
 
     internal Map GetNextMap()
     {
@@ -118,7 +81,6 @@ namespace SolverAOC2023_21
             if(!nextMap.Visited.Contains(newLocation))
             {
               nextMap.AddForSolve(targetField);
-
             }
           }
         }
@@ -163,323 +125,72 @@ namespace SolverAOC2023_21
       return BasePlots[location];
     }
 
-    public Dictionary<Point2D, List<DistanceItem>> GetDistances()
+
+    public long Solve(long steps, int iterationCount)
     {
-      Dictionary<Point2D, List<DistanceItem>> ret = new Dictionary<Point2D, List<DistanceItem>>();
 
-      BFS<BFSFieldContext> BFS = new BFS<BFSFieldContext>(StartField, new BFSFieldContext(ExtendedPlots));
+      int realSteps = ((int)steps + 2) / 2;
 
-      foreach (Field f in ExtendedPlots.Values)
+      int mod = BaseBounds.X.Max + 1;
+      Dictionary<int, List<long>> counts = new Dictionary<int, List<long>>();
+      List<long> firstCounts = new List<long>();
+      for(int j = 0; j < mod; j++)
       {
-        if(!BFS.IsReachable(f)) continue;
-        int dist = BFS.GetDistance(f);
-
-        int x = Mod(f.Location.X, (int)BaseBounds.X.Max + 1);
-        int y = Mod(f.Location.Y, (int)BaseBounds.Y.Max + 1);
-        Point2D baseLocation = new Point2D(x, y);
-        
-        if(!ret.ContainsKey(baseLocation))
-        {
-          ret.Add(baseLocation, new List<DistanceItem>());
-        }
-
-        EDirection9 dir = EDirection9.NONE;
-        if(f.Location.X < baseLocation.X && f.Location.Y < baseLocation.Y)
-        {
-          dir = EDirection9.UP_LEFT;
-        }
-        if (f.Location.X == baseLocation.X && f.Location.Y < baseLocation.Y)
-        {
-          dir = EDirection9.UP;
-        }
-        if (f.Location.X > baseLocation.X && f.Location.Y < baseLocation.Y)
-        {
-          dir = EDirection9.UP_RIGHT;
-        }
-
-        if (f.Location.X < baseLocation.X && f.Location.Y == baseLocation.Y)
-        {
-          dir = EDirection9.LEFT;
-        }
-        if (f.Location.X > baseLocation.X && f.Location.Y == baseLocation.Y)
-        {
-          dir = EDirection9.RIGHT;
-        }
-
-        if (f.Location.X < baseLocation.X && f.Location.Y > baseLocation.Y)
-        {
-          dir = EDirection9.DOWN_LEFT;
-        }
-        if (f.Location.X == baseLocation.X && f.Location.Y > baseLocation.Y)
-        {
-          dir = EDirection9.DOWN;
-        }
-        if (f.Location.X > baseLocation.X && f.Location.Y > baseLocation.Y)
-        {
-          dir = EDirection9.DOWN_RIGHT;
-        }
-
-
-
-        ret[baseLocation].Add(new DistanceItem(baseLocation, f.Location, dist, dir));
+        counts.Add(j, new List<long>());
       }
 
+      Map tmp = this;
+      int iX = 0;
+      long solvedCount = 0;
+      while(counts.Any(x=>x.Value.Count < iterationCount))
+      {
+        if (steps % 2 == iX % 2)
+        {
+          counts[(iX/2) % mod].Add(tmp.ForSolve.Count);
+          firstCounts.Add(tmp.ForSolve.Count);
+          solvedCount++;
+        }
+        tmp = tmp.GetNextMap();
+        iX++;
+        
+      }
 
-      return ret;
-    }
-
-
-    public long Solve(long steps)
-    {
       long res = 0;
-      Dictionary<Point2D, List<DistanceItem>> distances = GetDistances();
 
+      int firstTake = (int)Math.Min(solvedCount, realSteps);
+      long cnt = firstCounts.Take(firstTake).Sum();
+      res += cnt;
+      Debug.WriteLine($"Fist count: {cnt}");
 
-      int index1 = ExtendCount - 1;
-      int index2 = ExtendCount - 2;
-      int index3 = ExtendCount - 3;
-
-      //left
-      foreach (var kv in distances)
+      long n = Math.Max((realSteps - solvedCount) / mod, 0);
+      cnt = 0;
+      for(int i = 0; i < mod; i++)
       {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul =kv.Value.Where(x => x.Position == EDirection9.LEFT).ToList();
-        int minY = ul.Max(x => x.Location.Y);
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == minY).OrderBy(x=>x.Distance).ToList();
+        long d = counts[i][iterationCount - 1] - counts[i][iterationCount - 2];
+        long a1 = counts[i][iterationCount - 1] + d;
+        long aN = a1 + (n-1) * d;
+        long s = n * (a1 + aN) / 2;
+        cnt+= s;
+      }
+      res += cnt;
+      Debug.WriteLine($"Computed count: {cnt}");
 
-        
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        if(steps > xOffset)
+      long alreadySolved = n * mod + firstTake;
+      cnt = 0;
+      if(alreadySolved < realSteps)
+      {
+        long n2 = (realSteps - solvedCount) % mod;
+        for (int i = 0; i < n2; i++)
         {
-          long cnt = (steps - xOffset) / xDist;
-          if(xDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
+
+          long d = counts[i][iterationCount - 1] - counts[i][iterationCount - 2];
+          long a1 = counts[i][iterationCount - 1];
+          long aN = a1 + (n + 1 ) * d;
+          cnt += aN;
         }
       }
-
-      //Right
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.RIGHT).ToList();
-        int minY = ul.Max(x => x.Location.Y);
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == minY).OrderBy(x => x.Distance).ToList();
-
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        if (steps > xOffset)
-        {
-          long cnt = (steps - xOffset) / xDist;
-          if (xDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-        }
-      }
-
-      // Up
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.UP).ToList();
-        int maxX = ul.Max(x => x.Location.X);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == maxX).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > yOffset)
-        {
-          long cnt = (steps - yOffset) / yDist;
-          if (yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-        }
-      }
-
-      // Down
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.DOWN).ToList();
-        int minX = ul.Min(x => x.Location.X);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == minX).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > yOffset)
-        {
-          long cnt = (steps - yOffset) / yDist;
-          if (yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-         
-        }
-      }
-
-
-      // Up Left
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.UP_LEFT).ToList();
-        int maxX = ul.Max(x => x.Location.X);
-        int maxY = ul.Max(x => x.Location.Y);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == maxX).OrderBy(x => x.Distance).ToList();
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == maxY).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > xOffset)
-        {
-          long cntX = (steps - xOffset) / xDist;
-          long cntY = (steps - yOffset) / yDist;
-          long cnt = (cntX * cntY + 1) / 2;
-          if (xDist % 2 == 0 || yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-          Debug.WriteLine(cnt);
-        }
-      }
-
-
-      // Up Right
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.UP_RIGHT).ToList();
-        int minX = ul.Min(x => x.Location.X);
-        int minY = ul.Min(x => x.Location.Y);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == minX).OrderBy(x => x.Distance).ToList();
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == minY).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > xOffset)
-        {
-          long cntX = (steps - xOffset) / xDist;
-          long cntY = (steps - yOffset) / yDist;
-          long cnt = (cntX * cntY + 1) / 2;
-          if (xDist % 2 == 0 || yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-        }
-      }
-
-
-      // Down Left
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.DOWN_LEFT).ToList();
-        int maxX = ul.Max(x => x.Location.X);
-        int minY = ul.Min(x => x.Location.Y);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == maxX).OrderBy(x => x.Distance).ToList();
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == minY).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > xOffset)
-        {
-          long cntX = (steps - xOffset) / xDist;
-          long cntY = (steps - yOffset) / yDist;
-          long cnt = (cntX * cntY + 1) / 2;
-          if (xDist % 2 == 0 || yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-          Debug.WriteLine(cnt);
-        }
-      }
-
-      // Down Right
-      foreach (var kv in distances)
-      {
-        Point2D baseLocation = kv.Key;
-        List<DistanceItem> ul = kv.Value.Where(x => x.Position == EDirection9.DOWN_RIGHT).ToList();
-        int minX = ul.Min(x => x.Location.X);
-        int minY = ul.Min(x => x.Location.Y);
-        List<DistanceItem> yDists = ul.Where(x => x.Location.X == minX).OrderBy(x => x.Distance).ToList();
-        List<DistanceItem> xDists = ul.Where(x => x.Location.Y == minY).OrderBy(x => x.Distance).ToList();
-
-        if ((yDists[index1].Distance + yDists[index3].Distance) / 2 != yDists[index2].Distance) throw new Exception("Dist Error");
-        if ((xDists[index1].Distance + xDists[index3].Distance) / 2 != xDists[index2].Distance) throw new Exception("Dist Error");
-
-        int xDist = xDists[index1].Distance - xDists[index2].Distance;
-        int xOffset = xDists[0].Distance;
-
-        int yDist = yDists[index1].Distance - yDists[index2].Distance;
-        int yOffset = yDists[0].Distance;
-
-        if (steps > xOffset)
-        {
-          long cntX = (steps - xOffset) / xDist;
-          long cntY = (steps - yOffset) / yDist;
-          long cnt = (cntX * cntY + 1) / 2;
-          if (xDist % 2 == 0 || yDist % 2 == 0)
-          {
-            cnt = cnt / 2;
-          }
-          res += cnt;
-          Debug.WriteLine(cnt);
-        }
-      }
-
-
-
-
-
-
-
-
-
-
+      res += cnt;
+      Debug.WriteLine($"Rest count: {cnt}");
 
       return res;
     }
@@ -500,7 +211,6 @@ namespace SolverAOC2023_21
 
         ret.Add(f.Location, new DistanceItem(baseLocation, f.Location, dist, EDirection9.NONE));
       }
-
 
       return ret;
     }
@@ -539,67 +249,6 @@ namespace SolverAOC2023_21
       return sb.ToString();
     }
 
-
-    internal long GetRachableCount()
-    {
-      return 0;
-
-      //return Plots.Values.Count(x => x.Value);
-    }
-
-    public long Solve2(long steps)
-    {
-      
-
-      long res = 0;
-      Dictionary<Point2D, List<DistanceItem>>  dist = GetDistances();
-
-      List<SolvedDistance> solvedDistances = new List<SolvedDistance>();
-
-      foreach(var kv in dist) 
-      {
-        Point2D basePoint = kv.Key;
-        List<DistanceItem> di = kv.Value;
-
-        DistanceItem baseDistanceItemTmp; 
-
-        baseDistanceItemTmp = di.First(x=>x.Location.Equals(basePoint));
-        SolvedDistance sd = new SolvedDistance(basePoint, baseDistanceItemTmp.Distance, (int)BaseBounds.X.Max + 1, (int)BaseBounds.Y.Max + 1);
-        solvedDistances.Add(sd);
-
-        solvedDistances.Add(sd);
-        solvedDistances.Add(sd);
-        solvedDistances.Add(sd);
-
-
-      }
-      foreach (SolvedDistance sd in solvedDistances)
-      {
-        long xCnt = (steps - sd.Offset) / sd.DistanceX;
-        long yCnt = (steps - sd.Offset) / sd.DistanceY;
-
-        long tmp = (xCnt+1) * (yCnt)/2;
-        res += tmp;
-      }
-      //Debug.WriteLine(Print());
-      return res;
-    }
-  }
-
-  public class SolvedDistance
-  {
-    public Point2D Location;
-    public int Offset;
-    public int DistanceX;
-    public int DistanceY;
-
-    public SolvedDistance(Point2D location, int offset, int distanceX, int distanceY)
-    {
-      Location = location;
-      Offset = offset;
-      DistanceX = distanceX;
-      DistanceY = distanceY;
-    }
   }
 
   public class DistanceItem

@@ -32,6 +32,11 @@ namespace SolverAOC2023_24
       V_Z = double.Parse(vel[2]);
     }
 
+    public override string ToString()
+    {
+      return $"{Position}: {V_X} {V_Y} {V_Z}";
+    }
+
     public Hailstone(Coords position, double v_X, double v_Y, double v_Z) 
     {
       Position = position;
@@ -67,7 +72,20 @@ namespace SolverAOC2023_24
 
     public double GetCollisionTimeX(Hailstone hs)
     {
+      if (hs.Position.X == Position.X) return 0;
       return (hs.Position.X - Position.X) / (V_X - hs.V_X);
+    }
+
+    public double GetCollisionTimeY(Hailstone hs)
+    {
+      if (hs.Position.Y == Position.Y) return 0;
+      return (hs.Position.Y - Position.Y) / (V_Y - hs.V_Y);
+    }
+
+    public double GetCollisionTimeZ(Hailstone hs)
+    {
+      if (hs.Position.Z == Position.Z) return 0;
+      return (hs.Position.Z - Position.Z) / (V_Z - hs.V_Z);
     }
   }
 }
