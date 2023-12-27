@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AoCLib;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,53 +22,49 @@ namespace SolverAOC2023_20
     public object Solve1()
     {
 
-      for(int i =0; i < 1000; i++)
+      for(int i = 0; i < 1000; i++)
       {
         Machine.PushButton();
       }
       return Machine.LowSignalCount * Machine.HighSignalCount;
 
-      //long cnt = 0;
-      //while(!solutions.Contains(Machine.GetCustomHash()))
-      //{
-      //  solutions.Add(Machine.GetCustomHash());
-      //  Machine.PushButton();
-      //  cnt++;
-      //}
-
-      //long totalHigh = 0;
-      //long totalLow = 0;
-
-      //long repeatCount = 1000 / cnt;
-      //long rest = 1000 % cnt;
-
-      //totalHigh = repeatCount * Machine.HighSignalCount;
-      //totalLow = repeatCount * Machine.LowSignalCount;
-
-      //Machine.LowSignalCount = 0;
-      //Machine.HighSignalCount = 0;
-      //for (int i = 0; i < rest; i++)
-      //{
-      //  Machine.PushButton();
-      //}
-
-      //totalHigh += Machine.HighSignalCount;
-      //totalLow += Machine.LowSignalCount;
-
-      //return totalHigh * totalLow;
     }
 
     public object Solve2()
     {
 
-      long cnt = 0;
-      while(!Machine.PushButton2())
-      {
-        cnt++;
-      }
-      return cnt;
-    }
+      Machine.InterestingModules.Add("ft");
+      Machine.InterestingModules.Add("sv");
+      Machine.InterestingModules.Add("ng");
+      Machine.InterestingModules.Add("jz");
 
+      Dictionary<string, ulong> counts = new Dictionary<string, ulong>();
+     
+      long cnt = 0;
+      while (counts.Values.Count < 4)
+      {
+        Machine.PushButton2();
+        cnt++;
+        foreach (string module in Machine.InterestingModulesHit)
+        {
+          if (!counts.ContainsKey(module))
+          {
+            counts.Add(module, (ulong)cnt);
+          }
+        }
+      }
+
+      ulong res = 1;
+
+      foreach (ulong val in counts.Values)
+      {
+        ulong gcd = ModuloMath.GCD(val, res);
+        res = res * val / gcd;
+      }
+
+      return res;
+    }
 
   }
 }
+

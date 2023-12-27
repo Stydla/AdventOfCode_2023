@@ -18,6 +18,10 @@ namespace SolverAOC2023_20
     public ButtonModule ButtonModule { get; }
     public BroadcastModule BroadcastModule { get; }
 
+    public HashSet<string> InterestingModules { get; set; } = new HashSet<string>();
+
+    public HashSet<string> InterestingModulesHit { get; } = new HashSet<string>();
+
     public Machine(List<string> input)
     {
 
@@ -116,6 +120,7 @@ namespace SolverAOC2023_20
 
     public void PushButton()
     {
+      
       LinkedList<PulseMessage> currentMessages = new LinkedList<PulseMessage>();
       currentMessages.AddLast(new PulseMessage(EPulse.Low, ButtonModule, BroadcastModule));
 
@@ -131,6 +136,7 @@ namespace SolverAOC2023_20
         }
         currentMessages.RemoveFirst();
         List<PulseMessage> nextModules = currentMessage.ModuleTo.Execute(currentMessage);
+       
         
         foreach (PulseMessage module in nextModules)
         {
@@ -139,16 +145,14 @@ namespace SolverAOC2023_20
       }
     }
 
-    private static int index = 0;
 
     public bool PushButton2()
     {
-
+      InterestingModulesHit.Clear();
       Module RXModule = Modules["rx"];
       LinkedList<PulseMessage> currentMessages = new LinkedList<PulseMessage>();
       currentMessages.AddLast(new PulseMessage(EPulse.Low, ButtonModule, BroadcastModule));
 
-      //Debug.WriteLine($"{GetCustomHash()} | {GetCustomHash().Count(x=>x== 'I')} {index++}");
       while (currentMessages.Count > 0)
       {
       
@@ -159,6 +163,14 @@ namespace SolverAOC2023_20
         }
         currentMessages.RemoveFirst();
         List<PulseMessage> nextModules = currentMessage.ModuleTo.Execute(currentMessage);
+
+        if (currentMessage.Pulse == EPulse.High && InterestingModules.Contains(currentMessage.ModuleFrom.Name))
+        {
+          if(!InterestingModulesHit.Contains(currentMessage.ModuleFrom.Name))
+          {
+            InterestingModulesHit.Add(currentMessage.ModuleFrom.Name);
+          }
+        }
 
         foreach (PulseMessage module in nextModules)
         {

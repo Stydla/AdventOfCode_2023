@@ -24,7 +24,6 @@ namespace SolverAOC2023_20.Modules
       Inputs[pm.ModuleFrom] = pm.Pulse;
       EPulse currentPulse = Inputs.Values.All(x => x == EPulse.High) ? EPulse.Low : EPulse.High;
 
-
       List<PulseMessage> ret = new List<PulseMessage>();
       foreach (Module m in TargetModules)
       {
