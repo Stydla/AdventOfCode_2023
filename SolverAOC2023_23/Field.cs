@@ -1,4 +1,5 @@
 ﻿using AoCLib;
+using AoCLib.BFS;
 using AoCLib.Enums;
 using System;
 using System.Collections.Generic;
@@ -9,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace SolverAOC2023_23
 {
-  internal class Field
+  public class Field 
   {
 
     public Point2D Location { get; }
 
-    public char InputType { get; }
-
+    public char InputType { get; set; }
+    
     public Field(Point2D location, char inputType)
     {
       Location = location;
@@ -79,6 +80,29 @@ namespace SolverAOC2023_23
       return ret;
     }
 
+
+    public void GetDistance(HashSet<Field> forbidden, HashSet<Field> visited, Dictionary<Point2D, Field> allFields, Field target, int currentDistance, ref int maxDistance)
+    {
+      if(this == target)
+      {
+        if(maxDistance < currentDistance) maxDistance = currentDistance;
+        return;
+      }
+
+      if (forbidden.Contains(this)) return;
+      if(visited.Contains(this)) return;
+
+      visited.Add(this);
+      currentDistance++;
+      foreach (Field neighbour in this.GetEmptyNeighbours(allFields))
+      {
+        neighbour.GetDistance(forbidden, visited, allFields, target, currentDistance, ref maxDistance);
+      }
+      currentDistance--;
+      visited.Remove(this);
+    }
+
+    
   }
 
   public enum SlopeDirection

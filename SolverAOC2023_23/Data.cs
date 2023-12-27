@@ -16,19 +16,31 @@ namespace SolverAOC2023_23
     {
       // optionaly parse data
 
-      Map = new Map(Lines);
 
     }
 
     public object Solve1()
     {
+      Map = new Map(Lines);
       int ret = Map.Solve();
       return ret;
     }
 
     public object Solve2()
     {
-      throw new NotImplementedException();
+      List<string> lines = new List<string>();
+      foreach(string line in Lines) 
+      {
+        string newLine = line.Replace('>', '.');
+        newLine = newLine.Replace('v', '.');
+        newLine = newLine.Replace('<', '.');
+        newLine = newLine.Replace('^', '.');
+        lines.Add(newLine);
+      }
+
+      Map = new Map(lines);
+      int ret = Map.Solve2();
+      return ret;
     }
 
 
