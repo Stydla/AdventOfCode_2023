@@ -12,6 +12,7 @@ namespace SolverAOC2023_24
   {
 
     public List<Hailstone> Hailstones { get; set; } = new List<Hailstone>();
+    
 
     public double MinX, MaxX, MinY, MaxY;
 
@@ -65,79 +66,121 @@ namespace SolverAOC2023_24
     public object Solve2()
     {
 
-      long S_lowerThenX = long.MaxValue;
-      long V_greaterThenX = long.MinValue;
-
-      long S_greaterThenX = long.MinValue;
-      long V_lowerThenX = long.MinValue;
-      long S_greaterThenY = long.MinValue;
-      long V_lowerThenY = long.MinValue;
-      long S_greaterThenZ = long.MinValue;
-      long V_lowerThenZ = long.MinValue;
-
-      S_lowerThenX = (long)Hailstones.Min(x=>x.Position.X);
-      V_greaterThenX = (long)Hailstones.Max(x=>x.V_X);
-
-      S_greaterThenX = (long)Hailstones.Max(x => x.Position.X);
-      V_lowerThenX = (long)Hailstones.Min(x => x.V_X);
-      S_greaterThenY = (long)Hailstones.Max(x => x.Position.Y);
-      V_lowerThenY = (long)Hailstones.Min(x => x.V_Y);
-      S_greaterThenZ = (long)Hailstones.Max(x => x.Position.Z);
-      V_lowerThenZ = (long)Hailstones.Min(x => x.V_Z);
-
-
-      Coords coord = new Coords(S_greaterThenX, S_greaterThenY, S_greaterThenZ);
-      double V_X = V_lowerThenX - 1;
-      double V_Y = V_lowerThenY - 1;
-      double V_Z = V_lowerThenZ - 1;
-
-      bool change = true;
-      while(change) 
+      HashSet<int> impossibleX = new HashSet<int>();
+      HashSet<int> impossibleY = new HashSet<int>();
+      HashSet<int> impossibleZ = new HashSet<int>();
+      for (int i = 0; i < Hailstones.Count; i++)
       {
-        change = false;
-
-        Hailstone hs = new Hailstone(coord, V_X, V_Y, V_Z);
-        foreach (Hailstone hsTarget in Hailstones)
+        for(int j = i + 1; j < Hailstones.Count; j++)
         {
-          double collisionTimeX = hs.GetCollisionTimeX(hsTarget);
-          if (collisionTimeX < 0)
+          Hailstone h1 = Hailstones[i];
+          Hailstone h2 = Hailstones[j];
+          if((h1.Position.X > h2.Position.X && h1.V_X > h2.V_X)||
+            (h1.Position.X < h2.Position.X && h1.V_X < h2.V_X))
           {
-            coord.X++;
-            change = true;
+            int min = (int)Math.Min(h1.V_X, h2.V_X);
+            int max = (int)Math.Max(h1.V_X, h2.V_X);
+            for(int remove = min; remove <= max; remove++)
+            {
+              if (!impossibleX.Contains(remove))
+              {
+                impossibleX.Add(remove);
+              }
+            }
           }
-          double collisionTimeY = hs.GetCollisionTimeY(hsTarget);
-          if (collisionTimeY < 0)
+
+          if ((h1.Position.Y > h2.Position.Y && h1.V_Y > h2.V_Y) ||
+            (h1.Position.Y < h2.Position.Y && h1.V_Y < h2.V_Y))
           {
-            coord.Y++;
-            change = true;
+            int min = (int)Math.Min(h1.V_Y, h2.V_Y);
+            int max = (int)Math.Max(h1.V_Y, h2.V_Y);
+            for (int remove = min; remove <= max; remove++)
+            {
+              if (!impossibleY.Contains(remove))
+              {
+                impossibleY.Add(remove);
+              }
+            }
           }
-          double collisionTimeZ = hs.GetCollisionTimeZ(hsTarget);
-          if (collisionTimeZ < 0)
+
+          if ((h1.Position.Z > h2.Position.Z && h1.V_Z > h2.V_Z) ||
+            (h1.Position.Z < h2.Position.Z && h1.V_Z < h2.V_Z))
           {
-            coord.Z++;
-            change = true;
+            int min = (int)Math.Min(h1.V_Z, h2.V_Z);
+            int max = (int)Math.Max(h1.V_Z, h2.V_Z);
+            for (int remove = min; remove <= max; remove++)
+            {
+              if (!impossibleZ.Contains(remove))
+              {
+                impossibleZ.Add(remove);
+              }
+            }
           }
-          Debug.WriteLine($"{hs} | {collisionTimeX} {collisionTimeY} {collisionTimeZ}");
         }
       }
 
-      //for (int i = 19; i <= 25; i++)
-      //{
-      //  for (int j = -3; j > -20; j--)
-      //  {
-      //    Coords c = new Coords(i, 20, 20);
-      //    Hailstone hs = new Hailstone(c, j, 20,20);
+     
 
-      //    foreach (Hailstone hsTarget in Hailstones)
-      //    {
-      //      double collisionTimeX = hs.GetCollisionTimeX(hsTarget);
-      //      double collisionTimeY = hs.GetCollisionTimeY(hsTarget);
-      //      double collisionTimeZ = hs.GetCollisionTimeZ(hsTarget);
-      //      Debug.WriteLine($"S:{i}, V:{j}   | {collisionTimeX} {collisionTimeY} {collisionTimeZ}");
-      //    }
-      //    Debug.WriteLine("");
-      //  }
-      //}
+
+      int iBounds = (int)Hailstones.Max(x => x.V_X) - (int)Hailstones.Min(x => x.V_X);
+      int jBounds = (int)Hailstones.Max(x => x.V_Y) - (int)Hailstones.Min(x => x.V_Y);
+      int kBounds = (int)Hailstones.Max(x => x.V_Z) - (int)Hailstones.Min(x => x.V_Z);
+
+      for (int i = 0; i <= iBounds; i++)
+      {
+        if(impossibleX.Contains(i)) continue;
+        
+        for (int j = -jBounds; j <= jBounds; j++)
+        {
+          if (impossibleY.Contains(j)) continue;
+          for (int k = -kBounds; k <= kBounds; k++)
+          {
+            if (impossibleZ.Contains(k)) continue;
+
+            List<Collision> collisions = new List<Collision>();
+
+            Hailstone h = Hailstones[0];
+            Hailstone h1 = new Hailstone(h.Position, h.V_X - i, h.V_Y - j, h.V_Z - k);
+
+            for (int hi = 1; hi < Hailstones.Count; hi++)
+            {
+              Hailstone hNext = Hailstones[hi];
+
+              Hailstone h2 = new Hailstone(hNext.Position, hNext.V_X - i, hNext.V_Y - j, hNext.V_Z - k);
+
+              Collision collision = h1.GetCollisionPosition(h2);
+
+              if(double.IsNaN(collision.CollisionTime1) || double.IsInfinity(collision.CollisionTime1))
+              {
+                continue;
+              }
+              collisions.Add(collision);
+              h1 = h2;
+
+              if (collisions.Count > 1)
+              {
+                double eps = 0.0000001;
+                double EpsX = (collisions[0].Position.X + collisions.Last().Position.X + 10.0) * eps;
+                double EpsY = (collisions[0].Position.Y + collisions.Last().Position.Y + 10.0) * eps;
+                double EpsZ = (collisions[0].Position.Z + collisions.Last().Position.Z + 10.0) * eps;
+                if (Math.Abs(collisions[0].Position.X - collisions.Last().Position.X) > EpsX ||
+                  Math.Abs(collisions[0].Position.Y - collisions.Last().Position.Y) > EpsY ||
+                  Math.Abs(collisions[0].Position.Z - collisions.Last().Position.Z) > EpsZ)
+                {
+                  break;
+                }
+              }
+             
+            }
+            if (collisions.Count > 2)
+            {
+              return collisions[0].Position.X + collisions[0].Position.Y + collisions[0].Position.Z;
+            }
+          }
+        }
+      }
+
+
       return 0;
     }
   }
